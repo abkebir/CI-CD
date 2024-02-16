@@ -16,7 +16,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./test_sample.py
+        working-directory: ./own_folder
 
     steps:
       - name: checkout
