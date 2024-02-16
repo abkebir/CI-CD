@@ -15,11 +15,4 @@ def  add_word(word):
     return  False
 
 
-print(check())   # Output: []
-print(size())    # Output: 1
-
-print(add_word('apple'))     # Output: True
-                             #       Set now contains 'apple'
-
-
-print(words)
+add_word('apple')
