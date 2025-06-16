@@ -23,3 +23,4 @@ def add_word(word):
 config = get_env_config("dev")
 print(config['host'])
 add_word("apple")
+add_word("mango")
