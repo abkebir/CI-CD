@@ -11,7 +11,7 @@ on:
 
 jobs:
   dev-ci:
-    runs-on: Ubuntu 24.04
+    runs-on: Ubuntu-latest
 
     defaults:
       run:
