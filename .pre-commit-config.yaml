@@ -24,3 +24,16 @@ repos:
     hooks:
       - id: ruff-check
       - id: ruff-format
+#   - repo: https://github.com/hhatto/autopep8
+#     rev: v2.3.2
+#     hooks:
+#       - id: autopep8
+#   - repo: https://github.com/PyCQA/flake8
+#     rev: 7.2.0
+#     hooks:
+#       - id: flake8
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.13
+    hooks:
+       - id: ruff-check
+       - id: ruff-format
