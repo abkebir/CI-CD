@@ -1,0 +1,11 @@
+__pycache__
+.venv
+venv
+*.pyc
+.vscode
+*.pyo
+config.ini
+.ruff_cache
+build
+dist
+*.egg-info

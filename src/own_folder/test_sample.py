@@ -1,4 +1,4 @@
-from sample import add_word, size, check
+from src.own.sample import add_word, size, check
 
 
 # Test add_word() function with an existing word

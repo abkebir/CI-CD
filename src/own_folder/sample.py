@@ -21,6 +21,6 @@ def add_word(word):
 
 
 config = get_env_config("dev")
-print(config['port'])
+print(config["port"])
 add_word("apple")
 add_word("mango")
