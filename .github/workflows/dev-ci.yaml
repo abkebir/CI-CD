@@ -55,9 +55,9 @@ jobs:
     # This job runs unit tests
   check-tests:
     runs-on: Ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./src/own_folder
+    # defaults:
+    #   run:
+    #     working-directory: ./own_folder
     steps:
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
