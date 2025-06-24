@@ -49,8 +49,6 @@ jobs:
           pip install flake8 black ruff
           pre-commit run --all-files
 
-          ruff check .
-
 
     # This job runs unit tests
   check-tests:
@@ -58,6 +56,7 @@ jobs:
     # defaults:
     #   run:
     #     working-directory: ./own_folder
+
     steps:
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
