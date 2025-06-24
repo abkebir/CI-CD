@@ -18,6 +18,5 @@ config["prod"] = {
     "database": "prod_db",
 }
 
-with open("./environment/config.ini", "w")\
-     as configfile:
+with open("./environment/config.ini", "w") as configfile:
     config.write(configfile)

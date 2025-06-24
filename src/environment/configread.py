@@ -4,11 +4,10 @@ import pathlib
 
 def get_env_config(env: str) -> ConfigParser:
     """Retrieve configuration for a specific environment."""
-    config_file_path = pathlib.Path(__file__).\
-        parent.absolute().joinpath("config.ini")
+    config_file_path = pathlib.Path(__file__).parent.absolute().joinpath("config.ini")
     config = ConfigParser()
     config.read(config_file_path)
-    try:  
+    try:
         if env in config:
             return config[env]
     except KeyError:

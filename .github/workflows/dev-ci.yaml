@@ -1,35 +1,139 @@
-name: CI test workflow
+name: Tests, Build, and Publish to Test PyPI
+
 on:
+  pull_request:
+    types: [opened, synchronize]
   push:
     branches:
       - "main"
     paths:
       - "src/own_folder/**"
       - ".github/workflows/dev-ci.yaml"
-
   workflow_dispatch:
 
+
 jobs:
-  dev-ci:
-    runs-on: Ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./src/own_folder
-
+  # This job checks out the code, sets up Python, and caches dependencies
+  check-tag-and-cache:
+    runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag with the release version
+        run: |
+          git tag $(cat version.txt)
 
+  # This job runs linting, formatting, and other code quality checks
+  check-linting-formating:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - uses: actions/cache@v4
+        with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/.pre-commit-config.yaml') }}
+            restore-keys: |
+              ${{ runner.os }}-pip-
+      - name: Install pre-commit
+        run: |
+         pip install pre-commit
+      - name: Linting, Format and other code quality check
+        run: |
+          pip install flake8 black ruff
+          pre-commit run --all-files
+
+          ruff check .
+
+
+    # This job runs unit tests
+  check-tests:
+    runs-on: Ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src/own_folder
+    steps:
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      -  uses: actions/cache@v4
+         with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt','**/pyproject.toml') }}
+            restore-keys: |
+              ${{ runner.os }}-pip-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+      - name: Unit tests
+        run: pytest -V test_sample.py
+
+  # This job builds the package and creates a source distribution and wheel
+  build-sdist-wheel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
 
-      - name: Install dependencies
+      - uses: actions/cache@v4
+        with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-build
+            restore-keys: |
+              ${{ runner.os }}-pip-
+      - name: Build package
         run: |
-          python -m pip install --upgrade pip
-          pip install pytest
+          python -m pip install --upgrade build
+          python -m build --sdist --wheel
+      - name: upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-package-artifact
+          paths: |
+            ./dist/*
 
-      - name: Unit test example
-        run: pytest -V test_sample.py
+    # This publishes it to test PyPI
+  publish:
+    runs-on: ubuntu-latest
+    needs: [check-tag-and-cache, check-linting-formating, check-tests, build-sdist-wheel]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: my-package-artifact
+          path: ./dist
+      - uses: actions/cache@v4
+        with:
+              path: ~/.cache/pip
+              key: ${{ runner.os }}-pip-twine
+              restore-keys: |
+                ${{ runner.os }}-pip-
+      - name: Publish to testPypi
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          pip install twine
+          twine upload --repository-url https://test.pypi.org/legacy/ ./dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+      - name: Publish tag release
+        run: |
+          git push origin $(cat version.txt)
