@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
       - name: Tag with the release version
         run: |
-          git tag $(cat version.txt)
+          git tag $(cat ./version.txt)
 
   # This job runs linting, formatting, and other code quality checks
   check-linting-formating:
@@ -135,4 +135,4 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
       - name: Publish tag release
         run: |
-          git push origin $(cat version.txt)
+          git push origin $(cat ./version.txt)
